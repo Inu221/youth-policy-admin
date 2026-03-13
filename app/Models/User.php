@@ -2,44 +2,105 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Orchid\Platform\Models\User as OrchidUser;
+use Orchid\Screen\AsSource;
 
-class User extends Authenticatable
+class User extends OrchidUser
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory;
+    use SoftDeletes;
+    use AsSource;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    public const ROLE_DIRECTOR = 'director';
+    public const ROLE_DEPARTMENT_HEAD = 'department_head';
+    public const ROLE_ANALYST = 'analyst';
+
     protected $fillable = [
+        'department_id',
+        'full_name',
         'name',
+        'username',
         'email',
         'password',
+        'role',
+        'phone',
+        'is_active',
+        'last_login_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
+        'permissions',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'is_active' => 'boolean',
+        'permissions' => 'array',
         'password' => 'hashed',
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function responsibleDepartment()
+    {
+        return $this->hasOne(Department::class, 'responsible_user_id');
+    }
+
+    public function createdAnnualPlans()
+    {
+        return $this->hasMany(AnnualPlan::class, 'created_by');
+    }
+
+    public function approvedAnnualPlans()
+    {
+        return $this->hasMany(AnnualPlan::class, 'approved_by');
+    }
+
+    public function responsiblePlannedEvents()
+    {
+        return $this->hasMany(PlannedEvent::class, 'responsible_user_id');
+    }
+
+    public function responsibleActualEvents()
+    {
+        return $this->hasMany(ActualEvent::class, 'responsible_user_id');
+    }
+
+    public function createdActualEvents()
+    {
+        return $this->hasMany(ActualEvent::class, 'created_by');
+    }
+
+    public function reviewedActualEventVerifications()
+    {
+        return $this->hasMany(ActualEventVerification::class, 'reviewer_id');
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
+    }
+
+    public function isDirector(): bool
+    {
+        return $this->role === self::ROLE_DIRECTOR;
+    }
+
+    public function isDepartmentHead(): bool
+    {
+        return $this->role === self::ROLE_DEPARTMENT_HEAD;
+    }
+
+    public function isAnalyst(): bool
+    {
+        return $this->role === self::ROLE_ANALYST;
+    }
 }
