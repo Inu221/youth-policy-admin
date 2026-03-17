@@ -13,6 +13,9 @@ class ParticipantListLayout extends Table
 
     protected function columns(): iterable
     {
+        $user = auth()->user();
+        $canViewContact = $user && ($user->isDirector() || $user->isDepartmentHead());
+
         return [
             TD::make('id', 'ID'),
 
@@ -28,10 +31,12 @@ class ParticipantListLayout extends Table
                 }),
 
             TD::make('phone', 'Телефон')
-                ->render(fn (Participant $participant) => $participant->phone ?: '—'),
+                ->render(fn (Participant $participant) => $participant->phone ?: '—')
+                ->canSee($canViewContact),
 
             TD::make('email', 'Email')
-                ->render(fn (Participant $participant) => $participant->email ?: '—'),
+                ->render(fn (Participant $participant) => $participant->email ?: '—')
+                ->canSee($canViewContact),
 
             TD::make('attendance_count', 'Посещений')
                 ->render(fn (Participant $participant) => $participant->attendance_count),

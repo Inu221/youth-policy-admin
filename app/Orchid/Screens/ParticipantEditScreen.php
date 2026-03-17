@@ -36,20 +36,29 @@ class ParticipantEditScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Button::make('Сохранить')
                 ->icon('bs.check-circle')
-                ->method('save'),
+                ->method('save')
+                ->canSee(
+                    ($this->participant?->exists && $user->can('update', $this->participant))
+                    || (!$this->participant?->exists && $user->can('create', Participant::class))
+                ),
 
             Button::make('Удалить')
                 ->icon('bs.trash3')
                 ->method('remove')
-                ->canSee($this->participant?->exists),
+                ->canSee($this->participant?->exists && $user->can('delete', $this->participant)),
         ];
     }
 
     public function layout(): iterable
     {
+        $user = auth()->user();
+        $canViewContact = $user && ($user->isDirector() || $user->isDepartmentHead());
+
         return [
             Layout::rows([
                 Input::make('participant.full_name')
@@ -62,11 +71,13 @@ class ParticipantEditScreen extends Screen
                     ->allowInput(),
 
                 Input::make('participant.phone')
-                    ->title('Телефон'),
+                    ->title('Телефон')
+                    ->canSee($canViewContact),
 
                 Input::make('participant.email')
                     ->title('Email')
-                    ->type('email'),
+                    ->type('email')
+                    ->canSee($canViewContact),
 
                 Input::make('participant.attendance_count')
                     ->title('Количество посещений')

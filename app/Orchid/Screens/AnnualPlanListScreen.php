@@ -11,8 +11,11 @@ class AnnualPlanListScreen extends Screen
 {
     public function query(): iterable
     {
+        $user = auth()->user();
+
         return [
             'annualPlans' => AnnualPlan::with(['department', 'creator', 'approver'])
+                ->forUser($user)
                 ->orderByDesc('year')
                 ->orderByDesc('id')
                 ->paginate(15),
@@ -31,10 +34,13 @@ class AnnualPlanListScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Link::make('Создать план')
                 ->icon('bs.plus-circle')
-                ->route('platform.annual-plans.create'),
+                ->route('platform.annual-plans.create')
+                ->canSee($user->can('create', AnnualPlan::class)),
         ];
     }
 

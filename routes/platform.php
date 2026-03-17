@@ -35,6 +35,9 @@ use App\Orchid\Screens\ParticipantEditScreen;
 use App\Orchid\Screens\ParticipantListScreen;
 use App\Orchid\Screens\ActualEventParticipantEditScreen;
 use App\Orchid\Screens\ActualEventParticipantListScreen;
+use App\Orchid\Screens\ActualEventFileListScreen;
+use App\Orchid\Screens\ActualEventFileEditScreen;
+use App\Orchid\Screens\ReportsScreen;
 
 
 /*
@@ -179,6 +182,21 @@ Route::screen('actual-event-participants/create', ActualEventParticipantEditScre
 
 Route::screen('actual-event-participants/{actualEventParticipant}/edit', ActualEventParticipantEditScreen::class)
     ->name('platform.actual-event-participants.edit');
+
+Route::screen('actual-event-files', ActualEventFileListScreen::class)
+    ->name('platform.actual-event-files');
+
+Route::screen('actual-event-files/create', ActualEventFileEditScreen::class)
+    ->name('platform.actual-event-files.create');
+
+Route::screen('actual-event-files/{file}/edit', ActualEventFileEditScreen::class)
+    ->name('platform.actual-event-files.edit');
+
+Route::get('actual-event-files/{file}/download', [\App\Http\Controllers\ActualEventFileController::class, 'download'])
+    ->name('platform.actual-event-files.download');
+
+Route::screen('reports', ReportsScreen::class)
+    ->name('platform.reports');
 
 Route::screen('/examples/form/fields', ExampleFieldsScreen::class)->name('platform.example.fields');
 Route::screen('/examples/form/advanced', ExampleFieldsAdvancedScreen::class)->name('platform.example.advanced');

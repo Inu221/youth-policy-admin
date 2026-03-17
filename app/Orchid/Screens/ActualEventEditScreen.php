@@ -22,6 +22,13 @@ class ActualEventEditScreen extends Screen
 
     public function query(ActualEvent $actualEvent): iterable
     {
+        $user = auth()->user();
+
+        // Check access for existing event
+        if ($actualEvent->exists) {
+            abort_unless($user->can('view', $actualEvent), 403);
+        }
+
         return [
             'actualEvent' => $actualEvent,
         ];
@@ -41,30 +48,42 @@ class ActualEventEditScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Button::make('Сохранить')
                 ->icon('bs.check-circle')
-                ->method('save'),
+                ->method('save')
+                ->canSee(
+                    ($this->actualEvent?->exists && $user->can('update', $this->actualEvent))
+                    || (!$this->actualEvent?->exists && $user->can('create', ActualEvent::class))
+                ),
 
             Button::make('Удалить')
                 ->icon('bs.trash3')
                 ->method('remove')
-                ->canSee($this->actualEvent?->exists),
+                ->canSee($this->actualEvent?->exists && $user->can('delete', $this->actualEvent)),
         ];
     }
 
     public function layout(): iterable
     {
+        $user = auth()->user();
+
         return [
             Layout::rows([
                 Relation::make('actualEvent.department_id')
                     ->title('Подразделение')
                     ->fromModel(Department::class, 'name')
+                    ->applyScope('forUser', $user)
+                    ->disabled($user->isDepartmentHead())
+                    ->value($user->isDepartmentHead() ? $user->department_id : null)
                     ->required(),
 
                 Relation::make('actualEvent.planned_event_id')
                     ->title('Плановое мероприятие')
                     ->fromModel(PlannedEvent::class, 'title')
+                    ->applyScope('forUser', $user)
                     ->help('Можно оставить пустым для внепланового мероприятия'),
 
                 Input::make('actualEvent.title')
@@ -118,6 +137,15 @@ class ActualEventEditScreen extends Screen
 
     public function save(ActualEvent $actualEvent, Request $request)
     {
+        $user = auth()->user();
+
+        // Check permissions
+        if ($actualEvent->exists) {
+            abort_unless($user->can('update', $actualEvent), 403);
+        } else {
+            abort_unless($user->can('create', ActualEvent::class), 403);
+        }
+
         $validated = $request->validate([
             'actualEvent.department_id' => ['required', 'integer', 'exists:departments,id'],
             'actualEvent.planned_event_id' => ['nullable', 'integer', 'exists:planned_events,id'],
@@ -134,6 +162,11 @@ class ActualEventEditScreen extends Screen
         ]);
 
         $data = $validated['actualEvent'];
+
+        // Force department_id for department_head
+        if ($user->isDepartmentHead()) {
+            $data['department_id'] = $user->department_id;
+        }
 
         if (! $actualEvent->exists) {
             $data['created_by'] = auth()->id();
@@ -163,6 +196,8 @@ class ActualEventEditScreen extends Screen
 
     public function remove(ActualEvent $actualEvent)
     {
+        abort_unless(auth()->user()->can('delete', $actualEvent), 403);
+
         $actualEvent->delete();
 
         Alert::info('Фактическое мероприятие удалено.');

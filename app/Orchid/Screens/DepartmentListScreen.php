@@ -11,8 +11,11 @@ class DepartmentListScreen extends Screen
 {
     public function query(): iterable
     {
+        $user = auth()->user();
+
         return [
             'departments' => Department::with('responsibleUser')
+                ->forUser($user)
                 ->orderByDesc('id')
                 ->paginate(15),
         ];
@@ -30,10 +33,13 @@ class DepartmentListScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Link::make('Создать подразделение')
                 ->icon('bs.plus-circle')
-                ->route('platform.departments.create'),
+                ->route('platform.departments.create')
+                ->canSee($user->can('create', Department::class)),
         ];
     }
 

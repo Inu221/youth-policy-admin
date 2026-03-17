@@ -89,4 +89,17 @@ class ActualEvent extends Model
             'actual_event_participants'
         )->withPivot('added_by', 'created_at');
     }
+
+    public function scopeForUser($query, User $user)
+    {
+        if ($user->isDirector() || $user->isAnalyst()) {
+            return $query;
+        }
+
+        if ($user->isDepartmentHead()) {
+            return $query->where('department_id', $user->department_id);
+        }
+
+        return $query->whereNull('id');
+    }
 }

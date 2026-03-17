@@ -62,4 +62,19 @@ class PlannedEvent extends Model
     {
         return $this->hasMany(ActualEvent::class);
     }
+
+    public function scopeForUser($query, User $user)
+    {
+        if ($user->isDirector() || $user->isAnalyst()) {
+            return $query;
+        }
+
+        if ($user->isDepartmentHead()) {
+            return $query->whereHas('annualPlan', function ($q) use ($user) {
+                $q->where('department_id', $user->department_id);
+            });
+        }
+
+        return $query->whereNull('id');
+    }
 }

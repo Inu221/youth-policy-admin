@@ -11,12 +11,15 @@ class ActualEventListScreen extends Screen
 {
     public function query(): iterable
     {
+        $user = auth()->user();
+
         return [
             'actualEvents' => ActualEvent::with([
                 'department',
                 'plannedEvent.annualPlan',
                 'responsibleUser',
             ])
+                ->forUser($user)
                 ->orderByDesc('actual_start_at')
                 ->orderByDesc('id')
                 ->paginate(15),
@@ -35,10 +38,13 @@ class ActualEventListScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Link::make('Создать фактическое мероприятие')
                 ->icon('bs.plus-circle')
-                ->route('platform.actual-events.create'),
+                ->route('platform.actual-events.create')
+                ->canSee($user->isDirector() || $user->isDepartmentHead()),
         ];
     }
 

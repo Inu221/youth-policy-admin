@@ -43,6 +43,19 @@ class Department extends Model
         return $this->hasMany(ActualEvent::class);
     }
 
+    public function scopeForUser($query, User $user)
+    {
+        if ($user->isDirector() || $user->isAnalyst()) {
+            return $query;
+        }
+
+        if ($user->isDepartmentHead()) {
+            return $query->where('id', $user->department_id);
+        }
+
+        return $query->whereNull('id');
+    }
+
     public function getDisplayNameAttribute(): string
     {
         return $this->short_name ?: $this->name;
