@@ -21,6 +21,21 @@ use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 use App\Orchid\Screens\DepartmentEditScreen;
 use App\Orchid\Screens\DepartmentListScreen;
+use App\Orchid\Screens\AppUserEditScreen;
+use App\Orchid\Screens\AppUserListScreen;
+use App\Orchid\Screens\AnnualPlanEditScreen;
+use App\Orchid\Screens\AnnualPlanListScreen;
+use App\Orchid\Screens\PlannedEventEditScreen;
+use App\Orchid\Screens\PlannedEventListScreen;
+use App\Orchid\Screens\ActualEventEditScreen;
+use App\Orchid\Screens\ActualEventListScreen;
+use App\Orchid\Screens\ActualEventLinkEditScreen;
+use App\Orchid\Screens\ActualEventLinkListScreen;
+use App\Orchid\Screens\ParticipantEditScreen;
+use App\Orchid\Screens\ParticipantListScreen;
+use App\Orchid\Screens\ActualEventParticipantEditScreen;
+use App\Orchid\Screens\ActualEventParticipantListScreen;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +116,69 @@ Route::screen('departments/create', DepartmentEditScreen::class)
 
 Route::screen('departments/{department}/edit', DepartmentEditScreen::class)
     ->name('platform.departments.edit');
+
+Route::screen('app-users', AppUserListScreen::class)
+    ->name('platform.app-users');
+
+Route::screen('app-users/create', AppUserEditScreen::class)
+    ->name('platform.app-users.create');
+
+Route::screen('app-users/{user}/edit', AppUserEditScreen::class)
+    ->name('platform.app-users.edit');
+
+Route::screen('annual-plans', AnnualPlanListScreen::class)
+    ->name('platform.annual-plans');
+
+Route::screen('annual-plans/create', AnnualPlanEditScreen::class)
+    ->name('platform.annual-plans.create');
+
+Route::screen('annual-plans/{annualPlan}/edit', AnnualPlanEditScreen::class)
+    ->name('platform.annual-plans.edit');
+
+Route::screen('planned-events', PlannedEventListScreen::class)
+    ->name('platform.planned-events');
+
+Route::screen('planned-events/create', PlannedEventEditScreen::class)
+    ->name('platform.planned-events.create');
+
+Route::screen('planned-events/{plannedEvent}/edit', PlannedEventEditScreen::class)
+    ->name('platform.planned-events.edit');
+
+Route::screen('actual-events', ActualEventListScreen::class)
+    ->name('platform.actual-events');
+
+Route::screen('actual-events/create', ActualEventEditScreen::class)
+    ->name('platform.actual-events.create');
+
+Route::screen('actual-events/{actualEvent}/edit', ActualEventEditScreen::class)
+    ->name('platform.actual-events.edit');
+
+Route::screen('actual-event-links', ActualEventLinkListScreen::class)
+    ->name('platform.actual-event-links');
+
+Route::screen('actual-event-links/create', ActualEventLinkEditScreen::class)
+    ->name('platform.actual-event-links.create');
+
+Route::screen('actual-event-links/{actualEventLink}/edit', ActualEventLinkEditScreen::class)
+    ->name('platform.actual-event-links.edit');
+
+Route::screen('participants', ParticipantListScreen::class)
+    ->name('platform.participants');
+
+Route::screen('participants/create', ParticipantEditScreen::class)
+    ->name('platform.participants.create');
+
+Route::screen('participants/{participant}/edit', ParticipantEditScreen::class)
+    ->name('platform.participants.edit');
+
+Route::screen('actual-event-participants', ActualEventParticipantListScreen::class)
+    ->name('platform.actual-event-participants');
+
+Route::screen('actual-event-participants/create', ActualEventParticipantEditScreen::class)
+    ->name('platform.actual-event-participants.create');
+
+Route::screen('actual-event-participants/{actualEventParticipant}/edit', ActualEventParticipantEditScreen::class)
+    ->name('platform.actual-event-participants.edit');
 
 Route::screen('/examples/form/fields', ExampleFieldsScreen::class)->name('platform.example.fields');
 Route::screen('/examples/form/advanced', ExampleFieldsAdvancedScreen::class)->name('platform.example.advanced');
