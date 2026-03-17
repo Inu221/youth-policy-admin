@@ -1,69 +1,199 @@
-https://dbdiagram.io/d/youth_policy-69b4020178c6c4bc7ad8021b ER-Diagram
+# Youth Policy Admin MVP
 
+MVP веб-системы для учета и контроля мероприятий в сфере молодежной политики.  
+Проект представляет собой административную панель на Laravel + Orchid для планирования мероприятий, фиксации факта проведения, учета участников, проверки отчетности и просмотра аналитики.
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Статус проекта
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Проект доведен до состояния MVP и готов к демонстрации, тестированию и дальнейшему развитию.
 
-## About Laravel
+## ER-диаграмма
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+[ER-диаграмма базы данных](https://dbdiagram.io/d/youth_policy-69b4020178c6c4bc7ad8021b)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Назначение системы
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Система решает базовые задачи внутреннего учета:
 
-## Learning Laravel
+- ведение подразделений и пользователей;
+- формирование годовых планов;
+- учет плановых и фактических мероприятий;
+- хранение ссылок и файлов по мероприятиям;
+- учет участников и посещаемости;
+- проверка отчетов аналитиками;
+- просмотр календаря мероприятий;
+- ведение журнала действий;
+- получение сводной статистики и аналитики.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Основной функционал MVP
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- Панель управления с ключевыми показателями по мероприятиям, планам и участникам.
+- Управление подразделениями и пользователями.
+- Создание, согласование и закрытие годовых планов.
+- Ведение плановых мероприятий.
+- Ведение фактических мероприятий с привязкой к подразделению и ответственному.
+- Обязательная ссылка на публикацию о мероприятии в соцсети.
+- Загрузка файлов по фактическим мероприятиям.
+- Реестр участников мероприятий.
+- Автоматический пересчет `attendance_count` для участников.
+- Календарь мероприятий в формате месяц/неделя/день.
+- Верификация отчетов аналитиком или руководителем.
+- Журнал действий по критичным операциям.
+- Отчеты и аналитика по мероприятиям и участникам.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Роли пользователей
 
-## Laravel Sponsors
+| Роль | Возможности |
+| --- | --- |
+| `director` | Полный доступ к системе, управление пользователями, утверждение и закрытие планов, просмотр аудита, верификация отчетов |
+| `department_head` | Работа со своим подразделением, создание и редактирование планов и мероприятий в рамках своей зоны ответственности |
+| `analyst` | Просмотр данных, отчетов, календаря и верификация фактических мероприятий |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Основные сущности
 
-### Premium Partners
+- `departments` - подразделения;
+- `users` - пользователи системы;
+- `annual_plans` - годовые планы подразделений;
+- `planned_events` - плановые мероприятия;
+- `actual_events` - фактические мероприятия;
+- `participants` - участники;
+- `actual_event_participants` - участие в мероприятиях;
+- `actual_event_links` - ссылки на публикации и другие внешние материалы;
+- `actual_event_files` - файлы по мероприятиям;
+- `actual_event_verifications` - результаты проверки отчетов;
+- `audit_logs` - журнал действий пользователей.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Технологический стек
 
-## Contributing
+- PHP 8.1+
+- Laravel 10
+- Orchid Platform
+- MySQL / MariaDB
+- Blade
+- Vite
+- Tailwind CSS
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Структура MVP
 
-## Code of Conduct
+- [README.md](README.md) - краткое описание проекта;
+- [FINAL_MVP_DOCUMENTATION.md](FINAL_MVP_DOCUMENTATION.md) - подробная финальная документация по доработкам MVP.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Быстрый запуск локально
 
-## Security Vulnerabilities
+1. Установить PHP-зависимости:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer install
+```
 
-## License
+2. Подготовить переменные окружения:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+3. Указать параметры базы данных в `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=youth_policy_admin
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+4. Выполнить миграции:
+
+```bash
+php artisan migrate
+```
+
+5. Создать символическую ссылку для файлов:
+
+```bash
+php artisan storage:link
+```
+
+6. Установить фронтенд-зависимости и запустить сборку:
+
+```bash
+npm install
+npm run dev
+```
+
+7. Запустить приложение:
+
+```bash
+php artisan serve
+```
+
+После запуска административная панель будет доступна по адресу:
+
+```text
+http://127.0.0.1:8000/admin
+```
+
+## Создание первого пользователя
+
+Если в базе еще нет пользователей, можно создать первого руководителя через `tinker`:
+
+```bash
+php artisan tinker
+```
+
+```php
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+User::create([
+    'full_name' => 'Руководитель системы',
+    'name' => 'Руководитель системы',
+    'username' => 'director',
+    'email' => 'director@example.com',
+    'password' => Hash::make('password'),
+    'role' => User::ROLE_DIRECTOR,
+    'is_active' => true,
+    'permissions' => [
+        'platform.index' => true,
+    ],
+]);
+```
+
+После этого можно войти в админ-панель под созданными учетными данными.
+
+## Полезные команды
+
+Пересчет посещаемости участников:
+
+```bash
+php artisan participants:recalculate-attendance
+```
+
+Очистка кешей:
+
+```bash
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan cache:clear
+```
+
+Сборка фронтенда для production:
+
+```bash
+npm run build
+```
+
+## Что важно для MVP
+
+- Система ориентирована на внутреннюю административную работу.
+- Доступ к данным зависит от роли пользователя.
+- Для фактического мероприятия обязательна ссылка на публикацию в соцсети.
+- Утверждение отчетов и аудит действий реализованы как обязательные элементы контроля.
+- Календарь и аналитика добавлены для удобства руководителей и аналитиков.
+
+## Контекст проекта
+
+Проект подготовлен как MVP-решение для рабочей задачи: показать полный базовый цикл учета мероприятий молодежной политики от планирования до отчетности и контроля исполнения.

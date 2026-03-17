@@ -43,8 +43,18 @@ class PlatformProvider extends OrchidServiceProvider
 
             Menu::make('Отчеты')
                 ->icon('bs.bar-chart-line')
-                ->route('platform.reports')
+                ->route('platform.reports'),
+
+            Menu::make('Календарь')
+                ->icon('bs.calendar3')
+                ->route('platform.calendar')
                 ->divider(),
+
+            Menu::make('Журнал действий')
+                ->icon('bs.journal-text')
+                ->route('platform.audit-logs')
+                ->canSee($user && $user->isDirector())
+                ->title('Аудит'),
 
             Menu::make('Подразделения')
                 ->icon('bs.buildings')

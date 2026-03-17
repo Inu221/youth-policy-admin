@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register observers
+        \App\Models\ActualEventParticipant::observe(\App\Observers\ActualEventParticipantObserver::class);
+        \App\Models\ActualEvent::observe(\App\Observers\ActualEventObserver::class);
+        \App\Models\AnnualPlan::observe(\App\Observers\AnnualPlanObserver::class);
     }
 }

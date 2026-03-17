@@ -18,6 +18,8 @@ class ActualEventListScreen extends Screen
                 'department',
                 'plannedEvent.annualPlan',
                 'responsibleUser',
+                'links',
+                'verification',
             ])
                 ->forUser($user)
                 ->orderByDesc('actual_start_at')
