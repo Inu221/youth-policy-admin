@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,11 +11,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        if (! app()->environment(['local', 'development', 'testing'])) {
+            $this->command?->warn('DatabaseSeeder skips demo content outside local/testing. Run DemoDataSeeder manually if needed.');
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+            return;
+        }
+
+        $this->call(DemoDataSeeder::class);
     }
 }
