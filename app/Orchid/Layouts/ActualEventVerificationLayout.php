@@ -2,18 +2,15 @@
 
 namespace App\Orchid\Layouts;
 
-use App\Models\ActualEvent;
 use App\Models\ActualEventVerification;
-use Orchid\Screen\Actions\Button;
-use Orchid\Screen\Layouts\Rows;
+use Illuminate\Support\HtmlString;
 use Orchid\Screen\Fields\Label;
 use Orchid\Screen\Fields\TextArea;
+use Orchid\Screen\Layouts\Rows;
 
 class ActualEventVerificationLayout extends Rows
 {
     /**
-     * Views.
-     *
      * @return array
      */
     public function fields(): array
@@ -21,29 +18,31 @@ class ActualEventVerificationLayout extends Rows
         $actualEvent = $this->query->get('actualEvent');
         $user = auth()->user();
 
-        // Only show for analyst and director
         if (!$user->isAnalyst() && !$user->isDirector()) {
             return [];
         }
 
         $verification = $actualEvent->verification;
-        $primaryLink = $actualEvent->links()->where('link_type', 'social_post')->where('is_primary', true)->first();
+        $primaryLink = $actualEvent->links()
+            ->where('link_type', 'social_post')
+            ->where('is_primary', true)
+            ->first();
 
         $fields = [
             Label::make('verification_section')
                 ->title('Верификация мероприятия')
-                ->value('<hr class="my-3">'),
+                ->value(new HtmlString('<hr class="my-3">')),
         ];
 
-        // Show social link
         if ($primaryLink) {
             $fields[] = Label::make('social_link_label')
                 ->title('Ссылка на пост в соцсети')
-                ->value('<a href="' . e($primaryLink->url) . '" target="_blank" class="btn btn-sm btn-link">'
-                    . e($primaryLink->url) . ' <i class="bi bi-box-arrow-up-right"></i></a>');
+                ->value(new HtmlString(
+                    '<a href="' . e($primaryLink->url) . '" target="_blank" class="btn btn-sm btn-link">'
+                    . e($primaryLink->url) . ' <i class="bi bi-box-arrow-up-right"></i></a>'
+                ));
         }
 
-        // Show current status
         if ($verification) {
             $statusBadge = match ($verification->status) {
                 ActualEventVerification::STATUS_APPROVED => '<span class="badge bg-success">Одобрено</span>',
@@ -53,7 +52,7 @@ class ActualEventVerificationLayout extends Rows
 
             $fields[] = Label::make('verification_status')
                 ->title('Статус верификации')
-                ->value($statusBadge);
+                ->value(new HtmlString($statusBadge));
 
             if ($verification->reviewer) {
                 $fields[] = Label::make('verification_reviewer')
@@ -70,10 +69,9 @@ class ActualEventVerificationLayout extends Rows
             if ($verification->comment) {
                 $fields[] = Label::make('verification_comment')
                     ->title('Комментарий')
-                    ->value(nl2br(e($verification->comment)));
+                    ->value(new HtmlString(nl2br(e($verification->comment))));
             }
 
-            // Show action buttons if pending
             if ($verification->status === ActualEventVerification::STATUS_PENDING) {
                 $fields[] = TextArea::make('verification_new_comment')
                     ->title('Комментарий (необязательно)')
@@ -83,7 +81,7 @@ class ActualEventVerificationLayout extends Rows
         } else {
             $fields[] = Label::make('verification_status')
                 ->title('Статус верификации')
-                ->value('<span class="badge bg-secondary">Не создана</span>');
+                ->value(new HtmlString('<span class="badge bg-secondary">Не создана</span>'));
 
             $fields[] = TextArea::make('verification_new_comment')
                 ->title('Комментарий (необязательно)')
