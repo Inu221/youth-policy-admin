@@ -13,10 +13,21 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/ru.global.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+window.__calendarScreenInstance = window.__calendarScreenInstance || null;
+
+function initCalendarScreen() {
     var calendarEl = document.getElementById('calendar');
 
-    var calendar = new FullCalendar.Calendar(calendarEl, {
+    if (!calendarEl || typeof FullCalendar === 'undefined') {
+        return;
+    }
+
+    if (window.__calendarScreenInstance) {
+        window.__calendarScreenInstance.destroy();
+        window.__calendarScreenInstance = null;
+    }
+
+    window.__calendarScreenInstance = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'ru',
         headerToolbar: {
@@ -44,7 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/admin/actual-events/' + eventId + '/edit';
         },
         dateClick: function(info) {
-            // Create new event on date click
             var confirmed = confirm('Создать мероприятие на ' + info.dateStr + '?');
             if (confirmed) {
                 window.location.href = '/admin/actual-events/create?date=' + info.dateStr;
@@ -55,7 +65,16 @@ document.addEventListener('DOMContentLoaded', function() {
         eventDisplay: 'block'
     });
 
-    calendar.render();
+    window.__calendarScreenInstance.render();
+}
+
+document.addEventListener('DOMContentLoaded', initCalendarScreen);
+document.addEventListener('turbo:load', initCalendarScreen);
+document.addEventListener('turbo:before-cache', function() {
+    if (window.__calendarScreenInstance) {
+        window.__calendarScreenInstance.destroy();
+        window.__calendarScreenInstance = null;
+    }
 });
 </script>
 
