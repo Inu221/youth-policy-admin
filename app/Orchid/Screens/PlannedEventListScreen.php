@@ -11,8 +11,11 @@ class PlannedEventListScreen extends Screen
 {
     public function query(): iterable
     {
+        $user = auth()->user();
+
         return [
             'plannedEvents' => PlannedEvent::with(['annualPlan.department', 'responsibleUser'])
+                ->forUser($user)
                 ->orderByDesc('planned_start_at')
                 ->orderByDesc('id')
                 ->paginate(15),
@@ -31,10 +34,13 @@ class PlannedEventListScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Link::make('Создать мероприятие')
                 ->icon('bs.plus-circle')
-                ->route('platform.planned-events.create'),
+                ->route('platform.planned-events.create')
+                ->canSee($user->can('create', PlannedEvent::class)),
         ];
     }
 

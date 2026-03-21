@@ -160,7 +160,7 @@ return [
      */
 
     'template' => [
-        'header' => '',
+        'header' => 'platform.partials.header',
         'footer' => '',
     ],
 

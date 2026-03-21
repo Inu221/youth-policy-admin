@@ -21,6 +21,25 @@ class PlannedEventEditScreen extends Screen
 
     public function query(PlannedEvent $plannedEvent): iterable
     {
+        $user = auth()->user();
+
+        if ($plannedEvent->exists) {
+            abort_unless($user->can('view', $plannedEvent), 403);
+        }
+
+        if (! $plannedEvent->exists && request()->has('annual_plan_id')) {
+            $annualPlan = AnnualPlan::query()->findOrFail(request()->integer('annual_plan_id'));
+
+            abort_unless($user->can('view', $annualPlan), 403);
+            abort_if(
+                ! $user->isDirector() && $annualPlan->status !== AnnualPlan::STATUS_DRAFT,
+                403,
+                'Нельзя добавлять мероприятия в утвержденный или закрытый план.'
+            );
+
+            $plannedEvent->annual_plan_id = $annualPlan->id;
+        }
+
         return [
             'plannedEvent' => $plannedEvent,
         ];
@@ -40,25 +59,34 @@ class PlannedEventEditScreen extends Screen
 
     public function commandBar(): iterable
     {
+        $user = auth()->user();
+
         return [
             Button::make('Сохранить')
                 ->icon('bs.check-circle')
-                ->method('save'),
+                ->method('save')
+                ->canSee(
+                    ($this->plannedEvent?->exists && $user->can('update', $this->plannedEvent))
+                    || (! $this->plannedEvent?->exists && $user->can('create', PlannedEvent::class))
+                ),
 
             Button::make('Удалить')
                 ->icon('bs.trash3')
                 ->method('remove')
-                ->canSee($this->plannedEvent?->exists),
+                ->canSee($this->plannedEvent?->exists && $user->can('delete', $this->plannedEvent)),
         ];
     }
 
     public function layout(): iterable
     {
+        $user = auth()->user();
+
         return [
             Layout::rows([
                 Relation::make('plannedEvent.annual_plan_id')
                     ->title('Годовой план')
                     ->fromModel(AnnualPlan::class, 'title')
+                    ->applyScope('forUser', $user)
                     ->required(),
 
                 Input::make('plannedEvent.title')
@@ -107,6 +135,14 @@ class PlannedEventEditScreen extends Screen
 
     public function save(PlannedEvent $plannedEvent, Request $request)
     {
+        $user = auth()->user();
+
+        if ($plannedEvent->exists) {
+            abort_unless($user->can('update', $plannedEvent), 403);
+        } else {
+            abort_unless($user->can('create', PlannedEvent::class), 403);
+        }
+
         $validated = $request->validate([
             'plannedEvent.annual_plan_id' => ['required', 'integer', 'exists:annual_plans,id'],
             'plannedEvent.title' => ['required', 'string', 'max:255'],
@@ -121,6 +157,14 @@ class PlannedEventEditScreen extends Screen
         ]);
 
         $data = $validated['plannedEvent'];
+        $annualPlan = AnnualPlan::query()->findOrFail($data['annual_plan_id']);
+
+        abort_unless($user->can('view', $annualPlan), 403);
+        abort_if(
+            ! $user->isDirector() && $annualPlan->status !== AnnualPlan::STATUS_DRAFT,
+            403,
+            'Нельзя изменять мероприятия в утвержденном или закрытом плане.'
+        );
 
         if (! $plannedEvent->exists) {
             $data['created_by'] = auth()->id();
@@ -132,14 +176,25 @@ class PlannedEventEditScreen extends Screen
 
         Alert::info('Плановое мероприятие сохранено.');
 
+        if ($request->boolean('from_annual_plan') || $request->filled('annual_plan_id')) {
+            return redirect()->route('platform.annual-plans.edit', $plannedEvent->annual_plan_id);
+        }
+
         return redirect()->route('platform.planned-events');
     }
 
-    public function remove(PlannedEvent $plannedEvent)
+    public function remove(PlannedEvent $plannedEvent, Request $request)
     {
+        abort_unless(auth()->user()->can('delete', $plannedEvent), 403);
+
+        $annualPlanId = $plannedEvent->annual_plan_id;
         $plannedEvent->delete();
 
         Alert::info('Плановое мероприятие удалено.');
+
+        if ($request->boolean('from_annual_plan')) {
+            return redirect()->route('platform.annual-plans.edit', $annualPlanId);
+        }
 
         return redirect()->route('platform.planned-events');
     }

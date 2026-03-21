@@ -40,7 +40,7 @@ class RoleEditScreen extends Screen
      */
     public function name(): ?string
     {
-        return 'Edit Role';
+        return $this->role->exists ? 'Редактирование роли' : 'Создание роли';
     }
 
     /**
@@ -48,7 +48,7 @@ class RoleEditScreen extends Screen
      */
     public function description(): ?string
     {
-        return 'Modify the privileges and permissions associated with a specific role.';
+        return 'Настройка роли, привилегий и разрешений.';
     }
 
     /**
@@ -91,14 +91,14 @@ class RoleEditScreen extends Screen
             Layout::block([
                 RoleEditLayout::class,
             ])
-                ->title('Role')
-                ->description('Defines a set of privileges that grant users access to various services and allow them to perform specific tasks or operations.'),
+                ->title('Роль')
+                ->description('Определяет набор прав, который дает пользователям доступ к разделам системы и разрешенным действиям.'),
 
             Layout::block([
                 RolePermissionLayout::class,
             ])
-                ->title('Permission/Privilege')
-                ->description('A privilege is necessary to perform certain tasks and operations in an area.'),
+                ->title('Права и привилегии')
+                ->description('Здесь настраиваются дополнительные разрешения для выполнения конкретных действий в системе.'),
         ];
     }
 

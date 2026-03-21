@@ -4,12 +4,15 @@ namespace App\Orchid\Screens;
 
 use App\Models\AnnualPlan;
 use App\Models\Department;
+use App\Models\PlannedEvent;
 use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Button;
+use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Relation;
 use Orchid\Screen\Fields\Select;
 use Orchid\Screen\Screen;
+use Orchid\Screen\TD;
 use Orchid\Support\Facades\Alert;
 use Orchid\Support\Facades\Layout;
 
@@ -21,13 +24,21 @@ class AnnualPlanEditScreen extends Screen
     {
         $user = auth()->user();
 
-        // Check access for existing plan
         if ($annualPlan->exists) {
             abort_unless($user->can('view', $annualPlan), 403);
         }
 
+        $plannedEvents = [];
+        if ($annualPlan->exists) {
+            $plannedEvents = PlannedEvent::where('annual_plan_id', $annualPlan->id)
+                ->with(['responsibleUser'])
+                ->orderBy('planned_start_at')
+                ->get();
+        }
+
         return [
             'annualPlan' => $annualPlan,
+            'plannedEvents' => $plannedEvents,
         ];
     }
 
@@ -40,7 +51,9 @@ class AnnualPlanEditScreen extends Screen
 
     public function description(): ?string
     {
-        return 'Карточка годового плана';
+        return $this->annualPlan?->exists
+            ? 'Внутри плана можно добавлять и редактировать плановые мероприятия.'
+            : 'Сначала сохраните план, после этого появится кнопка добавления мероприятий.';
     }
 
     public function commandBar(): iterable
@@ -48,17 +61,29 @@ class AnnualPlanEditScreen extends Screen
         $user = auth()->user();
         $buttons = [];
 
-        // Save button (can't edit approved/closed plans unless director)
-        $canEdit = !$this->annualPlan?->exists
-            || $this->annualPlan->status === AnnualPlan::STATUS_DRAFT
-            || $user->isDirector();
+        $canManagePlannedEvents = $this->annualPlan?->exists
+            && $user->can('view', $this->annualPlan)
+            && $user->can('create', PlannedEvent::class)
+            && ($user->isDirector() || $this->annualPlan->status === AnnualPlan::STATUS_DRAFT);
+
+        if ($canManagePlannedEvents) {
+            $buttons[] = Link::make('Добавить мероприятие')
+                ->icon('bs.plus-circle')
+                ->route('platform.planned-events.create', [
+                    'annual_plan_id' => $this->annualPlan->id,
+                    'from_annual_plan' => 1,
+                ])
+                ->type(\Orchid\Support\Color::PRIMARY());
+        }
+
+        $canSave = ($this->annualPlan?->exists && $user->can('update', $this->annualPlan))
+            || (! $this->annualPlan?->exists && $user->can('create', AnnualPlan::class));
 
         $buttons[] = Button::make('Сохранить')
             ->icon('bs.check-circle')
             ->method('save')
-            ->canSee($canEdit && $user->can('update', $this->annualPlan ?? AnnualPlan::class));
+            ->canSee($canSave);
 
-        // Approve button (only director, only for draft plans)
         if ($this->annualPlan?->exists && $user->isDirector() && $this->annualPlan->status === AnnualPlan::STATUS_DRAFT) {
             $buttons[] = Button::make('Утвердить план')
                 ->icon('bs.check-circle-fill')
@@ -67,7 +92,6 @@ class AnnualPlanEditScreen extends Screen
                 ->confirm('Утвердить план работы?');
         }
 
-        // Close button (only director, only for approved plans)
         if ($this->annualPlan?->exists && $user->isDirector() && $this->annualPlan->status === AnnualPlan::STATUS_APPROVED) {
             $buttons[] = Button::make('Закрыть план')
                 ->icon('bs.lock-fill')
@@ -76,7 +100,6 @@ class AnnualPlanEditScreen extends Screen
                 ->confirm('Закрыть план работы? После закрытия план нельзя будет редактировать.');
         }
 
-        // Delete button
         $buttons[] = Button::make('Удалить')
             ->icon('bs.trash3')
             ->method('remove')
@@ -89,7 +112,7 @@ class AnnualPlanEditScreen extends Screen
     {
         $user = auth()->user();
 
-        return [
+        $layouts = [
             Layout::rows([
                 Relation::make('annualPlan.department_id')
                     ->title('Подразделение')
@@ -124,16 +147,47 @@ class AnnualPlanEditScreen extends Screen
                     ->help('Опционально'),
             ]),
         ];
+
+        if ($this->annualPlan?->exists) {
+            $layouts[] = Layout::table('plannedEvents', [
+                TD::make('title', 'Название мероприятия')
+                    ->render(fn (PlannedEvent $event) => Link::make($event->title)
+                        ->route('platform.planned-events.edit', [
+                            'plannedEvent' => $event->id,
+                            'from_annual_plan' => 1,
+                        ])),
+
+                TD::make('planned_start_at', 'Дата начала')
+                    ->render(fn (PlannedEvent $event) => $event->planned_start_at?->format('d.m.Y H:i')),
+
+                TD::make('responsible_user_id', 'Ответственный')
+                    ->render(fn (PlannedEvent $event) => $event->responsibleUser?->full_name ?? '—'),
+
+                TD::make('status', 'Статус')
+                    ->render(function (PlannedEvent $event) {
+                        $statusLabels = [
+                            PlannedEvent::STATUS_PLANNED => 'Запланировано',
+                            PlannedEvent::STATUS_IN_PROGRESS => 'Проводится',
+                            PlannedEvent::STATUS_ARCHIVED => 'Архив',
+                            PlannedEvent::STATUS_CANCELLED => 'Отменено',
+                        ];
+
+                        return $statusLabels[$event->status] ?? $event->status;
+                    }),
+            ])
+                ->title('Плановые мероприятия')
+                ->emptyText('Нет плановых мероприятий. Нажмите "Добавить мероприятие" для создания нового.');
+        }
+
+        return $layouts;
     }
 
     public function save(AnnualPlan $annualPlan, Request $request)
     {
         $user = auth()->user();
 
-        // Check permissions
         if ($annualPlan->exists) {
-            // Can't edit approved/closed plans unless director
-            if (($annualPlan->status === AnnualPlan::STATUS_APPROVED || $annualPlan->status === AnnualPlan::STATUS_CLOSED) && !$user->isDirector()) {
+            if (($annualPlan->status === AnnualPlan::STATUS_APPROVED || $annualPlan->status === AnnualPlan::STATUS_CLOSED) && ! $user->isDirector()) {
                 abort(403, 'Нельзя редактировать утвержденный или закрытый план.');
             }
             abort_unless($user->can('update', $annualPlan), 403);
@@ -150,12 +204,10 @@ class AnnualPlanEditScreen extends Screen
 
         $data = $validated['annualPlan'];
 
-        // Force department_id for department_head
         if ($user->isDepartmentHead()) {
             $data['department_id'] = $user->department_id;
         }
 
-        // Set default status for new plans
         if (! $annualPlan->exists) {
             $data['status'] = AnnualPlan::STATUS_DRAFT;
             $data['created_by'] = auth()->id();
@@ -163,9 +215,9 @@ class AnnualPlanEditScreen extends Screen
 
         $annualPlan->fill($data)->save();
 
-        Alert::info('Годовой план сохранен.');
+        Alert::info('Годовой план сохранен. Теперь внутри него можно добавлять мероприятия.');
 
-        return redirect()->route('platform.annual-plans');
+        return redirect()->route('platform.annual-plans.edit', $annualPlan);
     }
 
     public function approve(AnnualPlan $annualPlan)

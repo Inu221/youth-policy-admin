@@ -37,9 +37,9 @@ use App\Orchid\Screens\ActualEventParticipantEditScreen;
 use App\Orchid\Screens\ActualEventParticipantListScreen;
 use App\Orchid\Screens\ActualEventFileListScreen;
 use App\Orchid\Screens\ActualEventFileEditScreen;
-use App\Orchid\Screens\ReportsScreen;
-use App\Orchid\Screens\CalendarScreen;
 use App\Orchid\Screens\AuditLogListScreen;
+use App\Orchid\Screens\CalendarScreen;
+use App\Orchid\Screens\ReportsScreen;
 
 
 /*
@@ -56,6 +56,12 @@ use App\Orchid\Screens\AuditLogListScreen;
 // Main
 Route::screen('/main', PlatformScreen::class)
     ->name('platform.main');
+
+Route::screen('calendar', CalendarScreen::class)
+    ->name('platform.calendar');
+
+Route::screen('audit-logs', AuditLogListScreen::class)
+    ->name('platform.audit-logs');
 
 // Platform > Profile
 Route::screen('profile', UserProfileScreen::class)
@@ -199,15 +205,6 @@ Route::get('actual-event-files/{file}/download', [\App\Http\Controllers\ActualEv
 
 Route::screen('reports', ReportsScreen::class)
     ->name('platform.reports');
-
-Route::screen('calendar', CalendarScreen::class)
-    ->name('platform.calendar');
-
-Route::get('api/calendar/events', [\App\Http\Controllers\CalendarApiController::class, 'events'])
-    ->name('platform.api.calendar.events');
-
-Route::screen('audit-logs', AuditLogListScreen::class)
-    ->name('platform.audit-logs');
 
 Route::screen('/examples/form/fields', ExampleFieldsScreen::class)->name('platform.example.fields');
 Route::screen('/examples/form/advanced', ExampleFieldsAdvancedScreen::class)->name('platform.example.advanced');

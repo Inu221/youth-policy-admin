@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Orchid\Screens;
 
-use Orchid\Screen\Screen;
-use Orchid\Support\Facades\Layout;
 use App\Models\ActualEvent;
 use App\Models\AnnualPlan;
 use App\Models\Department;
-use App\Models\Participant;
+use App\Models\PlannedEvent;
+use Illuminate\Support\Facades\DB;
+use Orchid\Screen\Screen;
+use Orchid\Support\Facades\Layout;
 
 class PlatformScreen extends Screen
 {
@@ -23,56 +24,115 @@ class PlatformScreen extends Screen
         $user = auth()->user();
         $currentYear = now()->year;
 
-        // Get counts filtered by user role
-        $eventsQuery = ActualEvent::query();
-        $plansQuery = AnnualPlan::query();
+        $plansQuery = AnnualPlan::query()
+            ->forUser($user)
+            ->where('year', $currentYear);
+
+        $plannedEventsQuery = PlannedEvent::query()
+            ->whereHas('annualPlan', function ($query) use ($user, $currentYear) {
+                $query->where('year', $currentYear);
+
+                if ($user->isDepartmentHead()) {
+                    $query->where('department_id', $user->department_id);
+                }
+            });
+
+        $completedPlannedEventsQuery = (clone $plannedEventsQuery)
+            ->whereHas('actualEvents', function ($query) use ($currentYear) {
+                $query->where('status', ActualEvent::STATUS_ARCHIVED)
+                    ->whereYear('actual_start_at', $currentYear);
+            });
+
+        $participantsQuery = DB::table('actual_event_participants')
+            ->join('actual_events', 'actual_events.id', '=', 'actual_event_participants.actual_event_id');
 
         if ($user->isDepartmentHead()) {
-            $eventsQuery->where('department_id', $user->department_id);
-            $plansQuery->where('department_id', $user->department_id);
+            $participantsQuery->where('actual_events.department_id', $user->department_id);
         }
 
-        // Overall stats
-        $totalActualEvents = (clone $eventsQuery)->count();
-        $completedEvents = (clone $eventsQuery)->where('status', ActualEvent::STATUS_ARCHIVED)->count();
-        $totalPlans = (clone $plansQuery)->where('year', $currentYear)->count();
-        $totalParticipants = Participant::sum('attendance_count');
+        $totalPlannedEvents = (clone $plannedEventsQuery)->count();
+        $completedEvents = (clone $completedPlannedEventsQuery)->count();
+        $totalPlans = (clone $plansQuery)->count();
+        $totalParticipants = (clone $participantsQuery)->count();
 
-        // Department progress (for director only)
         $departmentProgress = [];
         if ($user->isDirector() || $user->isAnalyst()) {
-            $departmentProgress = Department::with(['actualEvents' => function ($q) use ($currentYear) {
-                $q->whereYear('actual_start_at', $currentYear);
-            }])
-                ->withCount([
-                    'actualEvents as completed_count' => function ($q) use ($currentYear) {
-                        $q->whereYear('actual_start_at', $currentYear)
-                          ->where('status', ActualEvent::STATUS_ARCHIVED);
-                    },
-                    'actualEvents as total_count' => function ($q) use ($currentYear) {
-                        $q->whereYear('actual_start_at', $currentYear);
-                    }
-                ])
+            $departmentProgress = Department::query()
+                ->orderBy('name')
                 ->get()
-                ->map(function ($dept) {
+                ->map(function (Department $department) use ($currentYear) {
+                    $plannedCount = PlannedEvent::query()
+                        ->whereHas('annualPlan', function ($query) use ($department, $currentYear) {
+                            $query->where('department_id', $department->id)
+                                ->where('year', $currentYear);
+                        })
+                        ->count();
+
+                    $completedCount = PlannedEvent::query()
+                        ->whereHas('annualPlan', function ($query) use ($department, $currentYear) {
+                            $query->where('department_id', $department->id)
+                                ->where('year', $currentYear);
+                        })
+                        ->whereHas('actualEvents', function ($query) use ($currentYear) {
+                            $query->where('status', ActualEvent::STATUS_ARCHIVED)
+                                ->whereYear('actual_start_at', $currentYear);
+                        })
+                        ->count();
+
                     return [
-                        'name' => $dept->short_name ?: $dept->name,
-                        'total' => $dept->total_count,
-                        'completed' => $dept->completed_count,
-                        'percentage' => $dept->total_count > 0 
-                            ? round(($dept->completed_count / $dept->total_count) * 100) 
+                        'name' => $department->display_name,
+                        'total' => $plannedCount,
+                        'completed' => $completedCount,
+                        'percentage' => $plannedCount > 0
+                            ? min(100, round(($completedCount / $plannedCount) * 100))
                             : 0,
                     ];
                 });
         }
 
+        $chartData = $this->getChartData($user);
+
         return [
-            'totalActualEvents' => $totalActualEvents,
+            'totalPlannedEvents' => $totalPlannedEvents,
             'completedEvents' => $completedEvents,
             'totalPlans' => $totalPlans,
             'totalParticipants' => $totalParticipants,
             'departmentProgress' => $departmentProgress,
             'currentYear' => $currentYear,
+            'chartData' => $chartData,
+        ];
+    }
+
+    private function getChartData($user): array
+    {
+        $days = 30;
+        $dates = [];
+        $eventsData = [];
+        $participantsData = [];
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dates[] = now()->subDays($i)->format('d.m');
+
+            $eventsQuery = ActualEvent::whereDate('actual_start_at', $date);
+            if ($user->isDepartmentHead()) {
+                $eventsQuery->where('department_id', $user->department_id);
+            }
+            $eventsData[] = $eventsQuery->count();
+
+            $participantsQuery = DB::table('actual_event_participants')
+                ->join('actual_events', 'actual_events.id', '=', 'actual_event_participants.actual_event_id')
+                ->whereDate('actual_events.actual_start_at', $date);
+            if ($user->isDepartmentHead()) {
+                $participantsQuery->where('actual_events.department_id', $user->department_id);
+            }
+            $participantsData[] = $participantsQuery->count();
+        }
+
+        return [
+            'dates' => $dates,
+            'events' => $eventsData,
+            'participants' => $participantsData,
         ];
     }
 

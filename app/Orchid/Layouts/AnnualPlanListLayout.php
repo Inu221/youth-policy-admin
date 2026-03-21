@@ -29,6 +29,12 @@ class AnnualPlanListLayout extends Table
 
             TD::make('year', 'Год'),
 
+            TD::make('planned_events_count', 'Плановых мероприятий')
+                ->align(TD::ALIGN_CENTER)
+                ->render(function (AnnualPlan $annualPlan) {
+                    return (string) ($annualPlan->planned_events_count ?? 0);
+                }),
+
             TD::make('status', 'Статус')
                 ->render(function (AnnualPlan $annualPlan) {
                     return match ($annualPlan->status) {
@@ -52,6 +58,14 @@ class AnnualPlanListLayout extends Table
             TD::make('updated_at', 'Обновлено')
                 ->render(function (AnnualPlan $annualPlan) {
                     return $annualPlan->updated_at?->format('d.m.Y H:i') ?? '—';
+                }),
+
+            TD::make('actions', 'Действия')
+                ->align(TD::ALIGN_CENTER)
+                ->render(function (AnnualPlan $annualPlan) {
+                    return Link::make('Открыть план')
+                        ->icon('bs.box-arrow-up-right')
+                        ->route('platform.annual-plans.edit', $annualPlan);
                 }),
         ];
     }

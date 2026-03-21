@@ -15,6 +15,7 @@ class AnnualPlanListScreen extends Screen
 
         return [
             'annualPlans' => AnnualPlan::with(['department', 'creator', 'approver'])
+                ->withCount('plannedEvents')
                 ->forUser($user)
                 ->orderByDesc('year')
                 ->orderByDesc('id')
@@ -29,7 +30,7 @@ class AnnualPlanListScreen extends Screen
 
     public function description(): ?string
     {
-        return 'Планы работы по управлениям';
+        return 'Планы работы по управлениям. Откройте нужный план, чтобы добавить мероприятия.';
     }
 
     public function commandBar(): iterable

@@ -21,7 +21,7 @@ class ProfilePasswordLayout extends Rows
             Password::make('old_password')
                 ->placeholder(__('Enter the current password'))
                 ->title(__('Current password'))
-                ->help('This is your password set at the moment.'),
+                ->help('Это ваш текущий пароль.'),
 
             Password::make('password')
                 ->placeholder(__('Enter the password to be set'))
@@ -30,7 +30,7 @@ class ProfilePasswordLayout extends Rows
             Password::make('password_confirmation')
                 ->placeholder(__('Enter the password to be set'))
                 ->title(__('Confirm new password'))
-                ->help('A good password is at least 15 characters or at least 8 characters long, including a number and a lowercase letter.'),
+                ->help('Надежный пароль должен быть достаточно длинным и содержать буквы и цифры.'),
         ];
     }
 }
