@@ -1,0 +1,35 @@
+@media (min-width: 1200px) {
+    .container-xl,
+    .container-xxl,
+    .workspace-limit {
+        max-width: min(1560px, calc(100vw - 2.5rem));
+    }
+}
+
+@media (min-width: 1400px) {
+    .container-xl,
+    .container-xxl,
+    .workspace-limit {
+        max-width: min(1720px, calc(100vw - 3rem));
+    }
+}
+
+@media (min-width: 992px) {
+    .layout-wrapper .table thead th {
+        white-space: nowrap;
+    }
+
+    .layout-wrapper .table tbody td {
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+}
+
+.header-brand img,
+.platform-brand-logo {
+    display: block;
+    height: 44px;
+    max-width: 100%;
+    object-fit: contain;
+    width: auto;
+}

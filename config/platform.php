@@ -126,7 +126,7 @@ return [
      */
 
     'resource' => [
-        'stylesheets' => [],
+        'stylesheets' => ['/css/platform-overrides.css'],
         'scripts'     => [],
     ],
 
@@ -160,7 +160,7 @@ return [
      */
 
     'template' => [
-        'header' => 'platform.partials.header',
+        'header' => 'vendor.platform.partials.header',
         'footer' => '',
     ],
 

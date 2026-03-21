@@ -40,6 +40,7 @@ use App\Orchid\Screens\ActualEventFileEditScreen;
 use App\Orchid\Screens\AuditLogListScreen;
 use App\Orchid\Screens\CalendarScreen;
 use App\Orchid\Screens\ReportsScreen;
+use App\Http\Controllers\CalendarApiController;
 
 
 /*
@@ -59,6 +60,9 @@ Route::screen('/main', PlatformScreen::class)
 
 Route::screen('calendar', CalendarScreen::class)
     ->name('platform.calendar');
+
+Route::get('api/calendar/events', [CalendarApiController::class, 'events'])
+    ->name('platform.calendar.events');
 
 Route::screen('audit-logs', AuditLogListScreen::class)
     ->name('platform.audit-logs');

@@ -143,12 +143,46 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const chartData = @json($chartData ?? ['dates' => [], 'events' => [], 'participants' => []]);
+window.__dashboardCharts = window.__dashboardCharts || {
+    events: null,
+    participants: null,
+};
+window.__dashboardChartData = @json($chartData ?? ['dates' => [], 'events' => [], 'participants' => []]);
+
+window.destroyDashboardCharts = function() {
+    if (window.__dashboardCharts.events) {
+        window.__dashboardCharts.events.destroy();
+        window.__dashboardCharts.events = null;
+    }
+
+    if (window.__dashboardCharts.participants) {
+        window.__dashboardCharts.participants.destroy();
+        window.__dashboardCharts.participants = null;
+    }
+};
+
+window.initDashboardCharts = function() {
+    if (typeof Chart === 'undefined') {
+        return;
+    }
 
     const eventsCtx = document.getElementById('eventsChart');
+    const participantsCtx = document.getElementById('participantsChart');
+
+    if (!eventsCtx && !participantsCtx) {
+        return;
+    }
+
+    const chartData = window.__dashboardChartData || {
+        dates: [],
+        events: [],
+        participants: [],
+    };
+
+    window.destroyDashboardCharts();
+
     if (eventsCtx) {
-        new Chart(eventsCtx, {
+        window.__dashboardCharts.events = new Chart(eventsCtx, {
             type: 'line',
             data: {
                 labels: chartData.dates,
@@ -181,9 +215,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const participantsCtx = document.getElementById('participantsChart');
     if (participantsCtx) {
-        new Chart(participantsCtx, {
+        window.__dashboardCharts.participants = new Chart(participantsCtx, {
             type: 'bar',
             data: {
                 labels: chartData.dates,
@@ -214,5 +247,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+};
+
+if (!window.__dashboardChartsEventsBound) {
+    document.addEventListener('DOMContentLoaded', function() {
+        window.initDashboardCharts();
+    });
+
+    document.addEventListener('turbo:load', function() {
+        window.initDashboardCharts();
+    });
+
+    document.addEventListener('turbo:before-cache', function() {
+        window.destroyDashboardCharts();
+    });
+
+    window.__dashboardChartsEventsBound = true;
+}
+
+window.initDashboardCharts();
 </script>

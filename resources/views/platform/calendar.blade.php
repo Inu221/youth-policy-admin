@@ -15,7 +15,7 @@
 <script>
 window.__calendarScreenInstance = window.__calendarScreenInstance || null;
 
-function initCalendarScreen() {
+window.initCalendarScreen = function() {
     var calendarEl = document.getElementById('calendar');
 
     if (!calendarEl || typeof FullCalendar === 'undefined') {
@@ -42,10 +42,25 @@ function initCalendarScreen() {
             day: 'День'
         },
         events: function(info, successCallback, failureCallback) {
-            fetch('/admin/api/calendar/events?start=' + info.startStr + '&end=' + info.endStr)
-                .then(response => response.json())
-                .then(data => successCallback(data))
-                .catch(error => {
+            var url = '{{ route('platform.calendar.events') }}?start=' + encodeURIComponent(info.startStr) + '&end=' + encodeURIComponent(info.endStr);
+
+            fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+
+                    return response.json();
+                })
+                .then(function(data) {
+                    successCallback(data);
+                })
+                .catch(function(error) {
                     console.error('Error fetching events:', error);
                     failureCallback(error);
                 });
@@ -66,16 +81,28 @@ function initCalendarScreen() {
     });
 
     window.__calendarScreenInstance.render();
+};
+
+if (!window.__calendarScreenEventsBound) {
+    document.addEventListener('DOMContentLoaded', function() {
+        window.initCalendarScreen();
+    });
+
+    document.addEventListener('turbo:load', function() {
+        window.initCalendarScreen();
+    });
+
+    document.addEventListener('turbo:before-cache', function() {
+        if (window.__calendarScreenInstance) {
+            window.__calendarScreenInstance.destroy();
+            window.__calendarScreenInstance = null;
+        }
+    });
+
+    window.__calendarScreenEventsBound = true;
 }
 
-document.addEventListener('DOMContentLoaded', initCalendarScreen);
-document.addEventListener('turbo:load', initCalendarScreen);
-document.addEventListener('turbo:before-cache', function() {
-    if (window.__calendarScreenInstance) {
-        window.__calendarScreenInstance.destroy();
-        window.__calendarScreenInstance = null;
-    }
-});
+window.initCalendarScreen();
 </script>
 
 <style>
