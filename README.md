@@ -197,3 +197,56 @@ npm run build
 ## Контекст проекта
 
 Проект подготовлен как MVP-решение для рабочей задачи: показать полный базовый цикл учета мероприятий молодежной политики от планирования до отчетности и контроля исполнения.
+
+## Автодеплой на сервер
+
+В репозитории добавлены:
+
+- `.github/workflows/deploy.yml` - деплой по SSH после успешной сборки Docker-образа;
+- `docker-compose.prod.yml` - production compose, который тянет образ из `ghcr.io`.
+
+Сценарий работы такой:
+
+1. Вы пушите изменения в `main`.
+2. GitHub Actions собирает образ и пушит его в `ghcr.io/inu221/youth-policy-admin:latest`.
+3. После успешной сборки запускается deploy workflow.
+4. Workflow подключается к серверу по SSH, делает `git pull`, затем `docker compose -f docker-compose.prod.yml pull` и `up -d`.
+
+### Секреты GitHub
+
+В `Settings -> Secrets and variables -> Actions` добавьте:
+
+- `DEPLOY_HOST` - IP или домен сервера;
+- `DEPLOY_USER` - пользователь для SSH;
+- `DEPLOY_SSH_KEY` - приватный SSH-ключ для входа на сервер;
+- `DEPLOY_PATH` - путь до папки проекта на сервере, например `/opt/youth-policy-admin`;
+- `DEPLOY_PORT` - SSH-порт, если он не `22`;
+- `GHCR_USERNAME` - GitHub username, у которого есть доступ к пакету в `ghcr.io`;
+- `GHCR_TOKEN` - GitHub token с правом `read:packages`.
+
+Если репозиторий приватный, для `GHCR_TOKEN` обычно ещё нужен доступ `repo`.
+
+### Что один раз сделать на сервере
+
+1. Установить Docker и Docker Compose plugin.
+2. Клонировать репозиторий в папку, указанную в `DEPLOY_PATH`.
+3. Положить рабочий `.env` в корень проекта на сервере.
+4. Проверить, что сервер может выполнить `git pull origin main` без запроса пароля.
+5. При необходимости задать порт через `APP_HTTP_PORT` в `.env`.
+
+Пример первой ручной инициализации на сервере:
+
+```bash
+git clone git@github.com:Inu221/youth-policy-admin.git /opt/youth-policy-admin
+cd /opt/youth-policy-admin
+docker login ghcr.io -u YOUR_GITHUB_USERNAME
+cp .env.example .env
+nano .env
+docker compose -f docker-compose.prod.yml up -d
+```
+
+После этого следующие пуши в `main` будут выкатываться автоматически.
+
+### Важно
+
+Текущий `docker-compose.yml` в репозитории не совпадает с `Dockerfile`: compose ожидает PHP-FPM на `app:9000`, а `Dockerfile` собирает Apache-контейнер на `80`. Поэтому для сервера лучше использовать именно `docker-compose.prod.yml`, добавленный для автодеплоя.

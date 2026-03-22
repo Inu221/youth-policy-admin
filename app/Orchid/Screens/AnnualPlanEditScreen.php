@@ -149,34 +149,52 @@ class AnnualPlanEditScreen extends Screen
         ];
 
         if ($this->annualPlan?->exists) {
-            $layouts[] = Layout::table('plannedEvents', [
-                TD::make('title', 'Название мероприятия')
-                    ->render(fn (PlannedEvent $event) => Link::make($event->title)
-                        ->route('platform.planned-events.edit', [
-                            'plannedEvent' => $event->id,
-                            'from_annual_plan' => 1,
-                        ])),
+            $layouts[] = new class extends \Orchid\Screen\Layouts\Table
+            {
+                protected $target = 'plannedEvents';
 
-                TD::make('planned_start_at', 'Дата начала')
-                    ->render(fn (PlannedEvent $event) => $event->planned_start_at?->format('d.m.Y H:i')),
+                protected $title = 'Плановые мероприятия';
 
-                TD::make('responsible_user_id', 'Ответственный')
-                    ->render(fn (PlannedEvent $event) => $event->responsibleUser?->full_name ?? '—'),
+                protected function columns(): iterable
+                {
+                    return [
+                        TD::make('title', 'Название мероприятия')
+                            ->render(fn (PlannedEvent $event) => Link::make($event->title)
+                                ->route('platform.planned-events.edit', [
+                                    'plannedEvent' => $event->id,
+                                    'from_annual_plan' => 1,
+                                ])),
 
-                TD::make('status', 'Статус')
-                    ->render(function (PlannedEvent $event) {
-                        $statusLabels = [
-                            PlannedEvent::STATUS_PLANNED => 'Запланировано',
-                            PlannedEvent::STATUS_IN_PROGRESS => 'Проводится',
-                            PlannedEvent::STATUS_ARCHIVED => 'Архив',
-                            PlannedEvent::STATUS_CANCELLED => 'Отменено',
-                        ];
+                        TD::make('planned_start_at', 'Дата начала')
+                            ->render(fn (PlannedEvent $event) => $event->planned_start_at?->format('d.m.Y H:i')),
 
-                        return $statusLabels[$event->status] ?? $event->status;
-                    }),
-            ])
-                ->title('Плановые мероприятия')
-                ->emptyText('Нет плановых мероприятий. Нажмите "Добавить мероприятие" для создания нового.');
+                        TD::make('responsible_user_id', 'Ответственный')
+                            ->render(fn (PlannedEvent $event) => $event->responsibleUser?->full_name ?? '—'),
+
+                        TD::make('status', 'Статус')
+                            ->render(function (PlannedEvent $event) {
+                                $statusLabels = [
+                                    PlannedEvent::STATUS_PLANNED => 'Запланировано',
+                                    PlannedEvent::STATUS_IN_PROGRESS => 'Проводится',
+                                    PlannedEvent::STATUS_ARCHIVED => 'Архив',
+                                    PlannedEvent::STATUS_CANCELLED => 'Отменено',
+                                ];
+
+                                return $statusLabels[$event->status] ?? $event->status;
+                            }),
+                    ];
+                }
+
+                protected function textNotFound(): string
+                {
+                    return 'Нет плановых мероприятий';
+                }
+
+                protected function subNotFound(): string
+                {
+                    return 'Нажмите "Добавить мероприятие" для создания нового.';
+                }
+            };
         }
 
         return $layouts;
