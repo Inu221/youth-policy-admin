@@ -16,7 +16,8 @@ class PlannedEventListScreen extends Screen
         return [
             'plannedEvents' => PlannedEvent::with(['annualPlan.department', 'responsibleUser'])
                 ->forUser($user)
-                ->orderByDesc('planned_start_at')
+                ->filters()
+                ->defaultSort('planned_start_at', 'desc')
                 ->orderByDesc('id')
                 ->paginate(15),
         ];

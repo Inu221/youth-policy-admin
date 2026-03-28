@@ -17,7 +17,8 @@ class ActualEventParticipantListScreen extends Screen
                 'participant',
                 'addedBy',
             ])
-                ->orderByDesc('id')
+                ->filters()
+                ->defaultSort('id', 'desc')
                 ->paginate(20),
         ];
     }

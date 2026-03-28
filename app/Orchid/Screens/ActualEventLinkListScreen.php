@@ -13,7 +13,8 @@ class ActualEventLinkListScreen extends Screen
     {
         return [
             'actualEventLinks' => ActualEventLink::with(['actualEvent', 'creator'])
-                ->orderByDesc('id')
+                ->filters()
+                ->defaultSort('id', 'desc')
                 ->paginate(20),
         ];
     }

@@ -14,18 +14,23 @@ class AppUserListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make('id', 'ID'),
+            TD::make('id', 'ID')
+                ->sort(),
 
             TD::make('full_name', 'ФИО')
+                ->sort()
                 ->render(function (User $user) {
                     return Link::make($user->full_name ?? $user->name ?? '—')
                         ->route('platform.app-users.edit', $user);
                 }),
 
-            TD::make('username', 'Логин'),
-            TD::make('email', 'Email'),
+            TD::make('username', 'Логин')
+                ->sort(),
+            TD::make('email', 'Email')
+                ->sort(),
 
             TD::make('role', 'Роль')
+                ->sort()
                 ->render(function (User $user) {
                     return match ($user->role) {
                         User::ROLE_DIRECTOR => 'Руководитель департамента',
@@ -41,9 +46,11 @@ class AppUserListLayout extends Table
                 }),
 
             TD::make('is_active', 'Активность')
+                ->sort()
                 ->render(fn (User $user) => $user->is_active ? 'Активен' : 'Отключен'),
 
             TD::make('updated_at', 'Обновлено')
+                ->sort()
                 ->render(fn (User $user) => $user->updated_at?->format('d.m.Y H:i') ?? '—'),
         ];
     }

@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Screen\AsSource;
+use Orchid\Filters\Filterable;
 
 class PlannedEvent extends Model
 {
     use HasFactory;
     use SoftDeletes;
     use AsSource;
+    use Filterable;
 
     public const STATUS_PLANNED = 'planned';
     public const STATUS_IN_PROGRESS = 'in_progress';
@@ -36,6 +38,18 @@ class PlannedEvent extends Model
     protected $casts = [
         'planned_start_at' => 'datetime',
         'planned_end_at' => 'datetime',
+    ];
+
+    protected $allowedSorts = [
+        'id',
+        'annual_plan_id',
+        'title',
+        'planned_start_at',
+        'responsible_user_id',
+        'planned_participants_count',
+        'status',
+        'updated_at',
+        'created_at',
     ];
 
     public function annualPlan()

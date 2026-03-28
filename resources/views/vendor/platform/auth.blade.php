@@ -5,8 +5,8 @@
     <div class="container-md">
         <div class="form-signin h-full min-vh-100 d-flex flex-column justify-content-center">
 
-            <a class="d-flex justify-content-center mb-4 p-0 px-sm-5" href="{{Dashboard::prefix()}}">
-                @includeFirst([config('platform.template.header'), 'platform::header'])
+            <a class="d-flex justify-content-center mb-4 p-0 px-sm-5" href="{{ Dashboard::prefix() }}">
+                <x-application-logo class="platform-auth-logo" />
             </a>
 
             <div class="row justify-content-center">

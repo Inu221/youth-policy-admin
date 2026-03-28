@@ -16,7 +16,9 @@ class DirectorAssignmentListScreen extends Screen
         return [
             'assignments' => DirectorAssignment::with(['department', 'creator'])
                 ->forUser($user)
-                ->orderByDesc('created_at')
+                ->filters()
+                ->defaultSort('created_at', 'desc')
+                ->orderByDesc('id')
                 ->paginate(15),
         ];
     }

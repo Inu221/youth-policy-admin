@@ -23,7 +23,9 @@ class AuditLogListScreen extends Screen
 
         return [
             'auditLogs' => AuditLog::with('user')
-                ->orderByDesc('created_at')
+                ->filters()
+                ->defaultSort('created_at', 'desc')
+                ->orderByDesc('id')
                 ->paginate(50),
         ];
     }
@@ -75,6 +77,7 @@ class AuditLogListScreen extends Screen
                     }),
 
                 TD::make('action', 'Действие')
+                    ->sort()
                     ->render(function (AuditLog $log) {
                         $badge = match ($log->action) {
                             'created' => '<span class="badge bg-success">Создание</span>',
@@ -86,6 +89,7 @@ class AuditLogListScreen extends Screen
                     }),
 
                 TD::make('entity_type', 'Сущность')
+                    ->sort()
                     ->render(function (AuditLog $log) {
                         $type = class_basename($log->entity_type);
                         return match ($type) {
@@ -118,6 +122,7 @@ class AuditLogListScreen extends Screen
                     }),
 
                 TD::make('ip_address', 'IP')
+                    ->sort()
                     ->render(function (AuditLog $log) {
                         return $log->ip_address ? '<small class="text-muted">' . e($log->ip_address) . '</small>' : '—';
                     }),

@@ -20,7 +20,8 @@ class ActualEventListScreen extends Screen
                 'responsibleUser',
             ])
                 ->forUser($user)
-                ->orderByDesc('actual_start_at')
+                ->filters()
+                ->defaultSort('actual_start_at', 'desc')
                 ->orderByDesc('id')
                 ->paginate(15),
         ];

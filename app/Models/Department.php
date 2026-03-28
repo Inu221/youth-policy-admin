@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Screen\AsSource;
+use Orchid\Filters\Filterable;
 
 class Department extends Model
 {
     use HasFactory;
     use SoftDeletes;
     use AsSource;
+    use Filterable;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_ARCHIVED = 'archived';
@@ -21,6 +23,16 @@ class Department extends Model
         'short_name',
         'responsible_user_id',
         'status',
+    ];
+
+    protected $allowedSorts = [
+        'id',
+        'name',
+        'short_name',
+        'responsible_user_id',
+        'status',
+        'updated_at',
+        'created_at',
     ];
 
     public function users()

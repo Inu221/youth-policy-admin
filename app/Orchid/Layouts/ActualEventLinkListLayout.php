@@ -14,7 +14,8 @@ class ActualEventLinkListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make('id', 'ID'),
+            TD::make('id', 'ID')
+                ->sort(),
 
             TD::make('actual_event', 'Мероприятие')
                 ->render(function (ActualEventLink $link) {
@@ -22,6 +23,7 @@ class ActualEventLinkListLayout extends Table
                 }),
 
             TD::make('link_type', 'Тип')
+                ->sort()
                 ->render(function (ActualEventLink $link) {
                     return match ($link->link_type) {
                         ActualEventLink::TYPE_SOCIAL_POST => 'Пост в соцсети',
@@ -32,6 +34,7 @@ class ActualEventLinkListLayout extends Table
                 }),
 
             TD::make('url', 'Ссылка')
+                ->sort()
                 ->render(function (ActualEventLink $link) {
                     return Link::make('Открыть')
                         ->href($link->url)
@@ -39,6 +42,7 @@ class ActualEventLinkListLayout extends Table
                 }),
 
             TD::make('is_primary', 'Основная')
+                ->sort()
                 ->render(fn (ActualEventLink $link) => $link->is_primary ? 'Да' : 'Нет'),
 
             TD::make('created_by', 'Добавил')

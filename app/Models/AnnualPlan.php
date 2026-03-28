@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Screen\AsSource;
+use Orchid\Filters\Filterable;
 
 class AnnualPlan extends Model
 {
     use HasFactory;
     use SoftDeletes;
     use AsSource;
+    use Filterable;
 
     public const STATUS_DRAFT = 'draft';
     public const STATUS_APPROVED = 'approved';
@@ -30,6 +32,19 @@ class AnnualPlan extends Model
 
     protected $casts = [
         'approved_at' => 'datetime',
+    ];
+
+    protected $allowedSorts = [
+        'id',
+        'department_id',
+        'year',
+        'title',
+        'planned_events_count',
+        'status',
+        'created_by',
+        'approved_by',
+        'updated_at',
+        'created_at',
     ];
 
     public function department()

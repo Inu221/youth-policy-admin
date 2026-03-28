@@ -14,7 +14,8 @@ class ActualEventParticipantListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make('id', 'ID'),
+            TD::make('id', 'ID')
+                ->sort(),
 
             TD::make('actual_event', 'Мероприятие')
                 ->render(function (ActualEventParticipant $item) {
@@ -32,6 +33,7 @@ class ActualEventParticipantListLayout extends Table
                 }),
 
             TD::make('created_at', 'Дата привязки')
+                ->sort()
                 ->render(function (ActualEventParticipant $item) {
                     return $item->created_at?->format('d.m.Y H:i') ?? '—';
                 }),

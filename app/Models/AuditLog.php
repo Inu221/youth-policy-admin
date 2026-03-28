@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Screen\AsSource;
+use Orchid\Filters\Filterable;
 
 class AuditLog extends Model
 {
     use HasFactory;
     use AsSource;
+    use Filterable;
 
     public $timestamps = false;
 
@@ -30,6 +32,16 @@ class AuditLog extends Model
         'old_values' => 'array',
         'new_values' => 'array',
         'created_at' => 'datetime',
+    ];
+
+    protected $allowedSorts = [
+        'id',
+        'created_at',
+        'user_id',
+        'action',
+        'entity_type',
+        'entity_id',
+        'ip_address',
     ];
 
     public function user()

@@ -13,7 +13,8 @@ class AppUserListScreen extends Screen
     {
         return [
             'users' => User::with('department')
-                ->orderByDesc('id')
+                ->filters()
+                ->defaultSort('id', 'desc')
                 ->paginate(15),
         ];
     }

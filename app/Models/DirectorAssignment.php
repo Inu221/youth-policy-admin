@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Screen\AsSource;
+use Orchid\Filters\Filterable;
 
 class DirectorAssignment extends Model
 {
     use HasFactory;
     use SoftDeletes;
     use AsSource;
+    use Filterable;
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_IN_PROGRESS = 'in_progress';
@@ -28,6 +30,17 @@ class DirectorAssignment extends Model
 
     protected $casts = [
         'due_date' => 'date',
+    ];
+
+    protected $allowedSorts = [
+        'id',
+        'department_id',
+        'title',
+        'status',
+        'due_date',
+        'created_by',
+        'created_at',
+        'updated_at',
     ];
 
     public function department()

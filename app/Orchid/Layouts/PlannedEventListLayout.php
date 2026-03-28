@@ -14,9 +14,11 @@ class PlannedEventListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make('id', 'ID'),
+            TD::make('id', 'ID')
+                ->sort(),
 
             TD::make('title', 'Мероприятие')
+                ->sort()
                 ->render(function (PlannedEvent $plannedEvent) {
                     return Link::make($plannedEvent->title)
                         ->route('platform.planned-events.edit', $plannedEvent);
@@ -33,6 +35,7 @@ class PlannedEventListLayout extends Table
                 }),
 
             TD::make('planned_start_at', 'Дата начала')
+                ->sort()
                 ->render(function (PlannedEvent $plannedEvent) {
                     return $plannedEvent->planned_start_at?->format('d.m.Y H:i') ?? '—';
                 }),
@@ -43,11 +46,13 @@ class PlannedEventListLayout extends Table
                 }),
 
             TD::make('planned_participants_count', 'План. участники')
+                ->sort()
                 ->render(function (PlannedEvent $plannedEvent) {
                     return $plannedEvent->planned_participants_count ?? '—';
                 }),
 
             TD::make('status', 'Статус')
+                ->sort()
                 ->render(function (PlannedEvent $plannedEvent) {
                     return match ($plannedEvent->status) {
                         PlannedEvent::STATUS_PLANNED => 'Запланировано',
@@ -59,6 +64,7 @@ class PlannedEventListLayout extends Table
                 }),
 
             TD::make('updated_at', 'Обновлено')
+                ->sort()
                 ->render(function (PlannedEvent $plannedEvent) {
                     return $plannedEvent->updated_at?->format('d.m.Y H:i') ?? '—';
                 }),

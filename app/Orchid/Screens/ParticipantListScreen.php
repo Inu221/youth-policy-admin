@@ -12,7 +12,8 @@ class ParticipantListScreen extends Screen
     public function query(): iterable
     {
         return [
-            'participants' => Participant::orderByDesc('attendance_count')
+            'participants' => Participant::filters()
+                ->defaultSort('attendance_count', 'desc')
                 ->orderBy('full_name')
                 ->paginate(20),
         ];

@@ -44,6 +44,20 @@ class User extends OrchidUser
         'password' => 'hashed',
     ];
 
+    protected $allowedSorts = [
+        'id',
+        'full_name',
+        'name',
+        'username',
+        'email',
+        'role',
+        'department_id',
+        'is_active',
+        'last_login_at',
+        'updated_at',
+        'created_at',
+    ];
+
     public function department()
     {
         return $this->belongsTo(Department::class);

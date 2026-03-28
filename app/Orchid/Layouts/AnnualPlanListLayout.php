@@ -14,9 +14,11 @@ class AnnualPlanListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make('id', 'ID'),
+            TD::make('id', 'ID')
+                ->sort(),
 
             TD::make('title', 'Название')
+                ->sort()
                 ->render(function (AnnualPlan $annualPlan) {
                     return Link::make($annualPlan->title)
                         ->route('platform.annual-plans.edit', $annualPlan);
@@ -27,15 +29,18 @@ class AnnualPlanListLayout extends Table
                     return $annualPlan->department?->display_name ?? '—';
                 }),
 
-            TD::make('year', 'Год'),
+            TD::make('year', 'Год')
+                ->sort(),
 
             TD::make('planned_events_count', 'Плановых мероприятий')
                 ->align(TD::ALIGN_CENTER)
+                ->sort()
                 ->render(function (AnnualPlan $annualPlan) {
                     return (string) ($annualPlan->planned_events_count ?? 0);
                 }),
 
             TD::make('status', 'Статус')
+                ->sort()
                 ->render(function (AnnualPlan $annualPlan) {
                     return match ($annualPlan->status) {
                         AnnualPlan::STATUS_DRAFT => 'Черновик',
@@ -56,6 +61,7 @@ class AnnualPlanListLayout extends Table
                 }),
 
             TD::make('updated_at', 'Обновлено')
+                ->sort()
                 ->render(function (AnnualPlan $annualPlan) {
                     return $annualPlan->updated_at?->format('d.m.Y H:i') ?? '—';
                 }),

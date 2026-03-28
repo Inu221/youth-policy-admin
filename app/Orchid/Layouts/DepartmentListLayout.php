@@ -25,7 +25,8 @@ class DepartmentListLayout extends Table
                         ->route('platform.departments.edit', $department);
                 }),
 
-            TD::make('short_name', 'Краткое название'),
+            TD::make('short_name', 'Краткое название')
+                ->sort(),
 
             TD::make('responsible_user', 'Ответственный')
                 ->render(function (Department $department) {

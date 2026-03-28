@@ -15,9 +15,11 @@ class ActualEventListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make('id', 'ID'),
+            TD::make('id', 'ID')
+                ->sort(),
 
             TD::make('title', 'Мероприятие')
+                ->sort()
                 ->render(function (ActualEvent $actualEvent) {
                     return Link::make($actualEvent->title)
                         ->route('platform.actual-events.edit', $actualEvent);
@@ -34,6 +36,7 @@ class ActualEventListLayout extends Table
                 }),
 
             TD::make('actual_start_at', 'Дата начала')
+                ->sort()
                 ->render(function (ActualEvent $actualEvent) {
                     return $actualEvent->actual_start_at?->format('d.m.Y H:i') ?? '—';
                 }),
@@ -44,6 +47,7 @@ class ActualEventListLayout extends Table
                 }),
 
             TD::make('actual_participants_count', 'Факт. участники')
+                ->sort()
                 ->render(function (ActualEvent $actualEvent) {
                     return $actualEvent->actual_participants_count;
                 }),
@@ -75,6 +79,7 @@ class ActualEventListLayout extends Table
                 ->canSee(auth()->user() && (auth()->user()->isAnalyst() || auth()->user()->isDirector())),
 
             TD::make('status', 'Статус')
+                ->sort()
                 ->render(function (ActualEvent $actualEvent) {
                     return match ($actualEvent->status) {
                         ActualEvent::STATUS_PLANNED => 'Запланировано',
@@ -86,6 +91,7 @@ class ActualEventListLayout extends Table
                 }),
 
             TD::make('updated_at', 'Обновлено')
+                ->sort()
                 ->render(function (ActualEvent $actualEvent) {
                     return $actualEvent->updated_at?->format('d.m.Y H:i') ?? '—';
                 }),

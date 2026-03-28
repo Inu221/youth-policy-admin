@@ -33,3 +33,12 @@
     object-fit: contain;
     width: auto;
 }
+
+
+.platform-auth-logo {
+    display: block;
+    height: 88px;
+    max-width: min(100%, 320px);
+    object-fit: contain;
+    width: auto;
+}

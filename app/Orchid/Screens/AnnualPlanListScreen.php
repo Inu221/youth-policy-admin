@@ -17,7 +17,8 @@ class AnnualPlanListScreen extends Screen
             'annualPlans' => AnnualPlan::with(['department', 'creator', 'approver'])
                 ->withCount('plannedEvents')
                 ->forUser($user)
-                ->orderByDesc('year')
+                ->filters()
+                ->defaultSort('year', 'desc')
                 ->orderByDesc('id')
                 ->paginate(15),
         ];

@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Orchid\Screen\AsSource;
+use Orchid\Filters\Filterable;
 
 class ActualEventParticipant extends Model
 {
     use AsSource;
+    use Filterable;
 
     public $timestamps = false;
 
@@ -22,6 +24,14 @@ class ActualEventParticipant extends Model
 
     protected $casts = [
         'created_at' => 'datetime',
+    ];
+
+    protected $allowedSorts = [
+        'id',
+        'actual_event_id',
+        'participant_id',
+        'added_by',
+        'created_at',
     ];
 
     public function actualEvent()

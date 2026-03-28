@@ -16,7 +16,8 @@ class DepartmentListScreen extends Screen
         return [
             'departments' => Department::with('responsibleUser')
                 ->forUser($user)
-                ->orderByDesc('id')
+                ->filters()
+                ->defaultSort('id', 'desc')
                 ->paginate(15),
         ];
     }

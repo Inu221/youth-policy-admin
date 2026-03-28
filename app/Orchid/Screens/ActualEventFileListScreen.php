@@ -20,7 +20,7 @@ class ActualEventFileListScreen extends Screen
         $user = auth()->user();
 
         $filesQuery = ActualEventFile::with(['actualEvent.department', 'uploader'])
-            ->orderByDesc('created_at');
+            ->filters();
 
         // Filter by department for department_head
         if ($user->isDepartmentHead()) {
@@ -30,7 +30,10 @@ class ActualEventFileListScreen extends Screen
         }
 
         return [
-            'files' => $filesQuery->paginate(20),
+            'files' => $filesQuery
+                ->defaultSort('created_at', 'desc')
+                ->orderByDesc('id')
+                ->paginate(20),
         ];
     }
 
@@ -70,27 +73,33 @@ class ActualEventFileListScreen extends Screen
     {
         return [
             Layout::table('files', [
-                TD::make('id', 'ID'),
+                TD::make('id', 'ID')
+                    ->sort(),
 
                 TD::make('actual_event_id', 'Мероприятие')
+                    ->sort()
                     ->render(function (ActualEventFile $file) {
                         return Link::make($file->actualEvent->title)
                             ->route('platform.actual-events.edit', $file->actualEvent);
                     }),
 
                 TD::make('original_name', 'Файл')
+                    ->sort()
                     ->render(function (ActualEventFile $file) {
                         return Link::make($file->original_name)
                             ->href(route('platform.actual-event-files.download', $file));
                     }),
 
                 TD::make('file_size', 'Размер')
+                    ->sort()
                     ->render(fn (ActualEventFile $file) => $this->formatFileSize($file->file_size)),
 
                 TD::make('uploaded_by', 'Загрузил')
+                    ->sort()
                     ->render(fn (ActualEventFile $file) => $file->uploader?->full_name ?? '—'),
 
                 TD::make('created_at', 'Дата загрузки')
+                    ->sort()
                     ->render(fn (ActualEventFile $file) => $file->created_at?->format('d.m.Y H:i') ?? '—'),
             ]),
         ];
