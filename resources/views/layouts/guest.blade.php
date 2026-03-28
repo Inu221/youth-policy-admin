@@ -16,9 +16,9 @@
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/admin">
-                    <x-application-logo class="h-20 w-auto" />
+            <div class="text-center w-full">
+                <a href="/admin" class="inline-block">
+                    <x-application-logo class="h-20 w-auto mx-auto" />
                 </a>
             </div>
 

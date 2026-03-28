@@ -40,6 +40,9 @@ use App\Orchid\Screens\ActualEventFileEditScreen;
 use App\Orchid\Screens\AuditLogListScreen;
 use App\Orchid\Screens\CalendarScreen;
 use App\Orchid\Screens\ReportsScreen;
+use App\Orchid\Screens\DepartmentRankingScreen;
+use App\Orchid\Screens\DirectorAssignmentListScreen;
+use App\Orchid\Screens\DirectorAssignmentEditScreen;
 use App\Http\Controllers\CalendarApiController;
 
 
@@ -66,6 +69,9 @@ Route::get('api/calendar/events', [CalendarApiController::class, 'events'])
 
 Route::screen('audit-logs', AuditLogListScreen::class)
     ->name('platform.audit-logs');
+
+Route::screen('department-ranking', DepartmentRankingScreen::class)
+    ->name('platform.department-ranking');
 
 // Platform > Profile
 Route::screen('profile', UserProfileScreen::class)
@@ -209,6 +215,19 @@ Route::get('actual-event-files/{file}/download', [\App\Http\Controllers\ActualEv
 
 Route::screen('reports', ReportsScreen::class)
     ->name('platform.reports');
+
+// Director Assignments
+Route::screen('director-assignments', DirectorAssignmentListScreen::class)
+    ->name('platform.director-assignments');
+
+Route::screen('director-assignments/create', DirectorAssignmentEditScreen::class)
+    ->name('platform.director-assignments.create');
+
+Route::screen('director-assignments/{assignment}/edit', DirectorAssignmentEditScreen::class)
+    ->name('platform.director-assignments.edit');
+
+Route::post('director-assignments/{assignment}/add-comment', [DirectorAssignmentEditScreen::class, 'addComment'])
+    ->name('platform.director-assignments.add-comment');
 
 Route::screen('/examples/form/fields', ExampleFieldsScreen::class)->name('platform.example.fields');
 Route::screen('/examples/form/advanced', ExampleFieldsAdvancedScreen::class)->name('platform.example.advanced');

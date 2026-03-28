@@ -10,6 +10,8 @@ use App\Models\ActualEventVerification;
 use App\Models\AnnualPlan;
 use App\Models\AuditLog;
 use App\Models\Department;
+use App\Models\DirectorAssignment;
+use App\Models\DirectorAssignmentComment;
 use App\Models\Participant;
 use App\Models\PlannedEvent;
 use App\Models\User;
@@ -71,6 +73,7 @@ class DemoDataSeeder extends Seeder
             $this->syncParticipantCounters();
             $this->seedActualEventLinks();
             $this->seedActualEventFiles();
+            $this->seedDirectorAssignments();
             $this->seedManualAuditEntries();
             $this->printCredentials();
         } finally {
@@ -795,6 +798,174 @@ class DemoDataSeeder extends Seeder
         $this->command->info('Демо-данные загружены.');
         $this->command->line('Логин для всех демо-аккаунтов: пароль `password`.');
         $this->command->line('director / analyst / head_north / head_center / head_south / head_archive');
+    }
+
+    private function seedDirectorAssignments(): void
+    {
+        // Поручения для Северска
+        $assignmentNorth1 = DirectorAssignment::query()->updateOrCreate(
+            [
+                'department_id' => $this->departments['north']->id,
+                'title' => 'Подготовить отчет по итогам I квартала',
+            ],
+            [
+                'description' => 'Необходимо подготовить сводный отчет по всем проведенным мероприятиям за первый квартал 2026 года с указанием количества участников и достигнутых результатов.',
+                'status' => DirectorAssignment::STATUS_COMPLETED,
+                'due_date' => now()->subDays(5),
+                'created_by' => $this->director->id,
+                'created_at' => now()->subDays(15),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentNorth1->id,
+                'comment' => 'Работаем над отчетом, планируем завершить к концу недели',
+            ],
+            [
+                'user_id' => $this->users['north_head']->id,
+                'created_at' => now()->subDays(10),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentNorth1->id,
+                'comment' => 'Отчет готов и отправлен на рассмотрение',
+            ],
+            [
+                'user_id' => $this->users['north_head']->id,
+                'created_at' => now()->subDays(5),
+            ]
+        );
+
+        $assignmentNorth2 = DirectorAssignment::query()->updateOrCreate(
+            [
+                'department_id' => $this->departments['north']->id,
+                'title' => 'Организация молодежного форума',
+            ],
+            [
+                'description' => 'Провести подготовительные мероприятия для организации молодежного форума, включая согласование площадки, программы и сметы расходов.',
+                'status' => DirectorAssignment::STATUS_IN_PROGRESS,
+                'due_date' => now()->addDays(14),
+                'created_by' => $this->director->id,
+                'created_at' => now()->subDays(7),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentNorth2->id,
+                'comment' => 'Площадка согласована, работаем над программой',
+            ],
+            [
+                'user_id' => $this->users['north_head']->id,
+                'created_at' => now()->subDays(3),
+            ]
+        );
+
+        // Поручения для Центра развития
+        $assignmentCenter1 = DirectorAssignment::query()->updateOrCreate(
+            [
+                'department_id' => $this->departments['center']->id,
+                'title' => 'Повышение активности добровольцев',
+            ],
+            [
+                'description' => 'Разработать план мероприятий по привлечению новых добровольцев и повышению активности существующих. Провести анализ текущей ситуации.',
+                'status' => DirectorAssignment::STATUS_IN_PROGRESS,
+                'due_date' => now()->addDays(21),
+                'created_by' => $this->director->id,
+                'created_at' => now()->subDays(5),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentCenter1->id,
+                'comment' => 'Проведен анализ, начали разработку плана мероприятий',
+            ],
+            [
+                'user_id' => $this->users['center_head']->id,
+                'created_at' => now()->subDays(2),
+            ]
+        );
+
+        // Поручения для Южного района
+        $assignmentSouth1 = DirectorAssignment::query()->updateOrCreate(
+            [
+                'department_id' => $this->departments['south']->id,
+                'title' => 'Подготовка к летней кампании',
+            ],
+            [
+                'description' => 'Подготовить программу летних мероприятий для молодежи, включая спортивные, культурные и образовательные активности.',
+                'status' => DirectorAssignment::STATUS_PENDING,
+                'due_date' => now()->addDays(30),
+                'created_by' => $this->director->id,
+                'created_at' => now()->subDays(2),
+            ]
+        );
+
+        $assignmentSouth2 = DirectorAssignment::query()->updateOrCreate(
+            [
+                'department_id' => $this->departments['south']->id,
+                'title' => 'Обновление базы участников',
+            ],
+            [
+                'description' => 'Провести актуализацию базы данных участников мероприятий, удалить дубликаты, проверить контактную информацию.',
+                'status' => DirectorAssignment::STATUS_COMPLETED,
+                'due_date' => now()->subDays(3),
+                'created_by' => $this->director->id,
+                'created_at' => now()->subDays(10),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentSouth2->id,
+                'comment' => 'База данных актуализирована, найдено и удалено 23 дубликата',
+            ],
+            [
+                'user_id' => $this->users['south_head']->id,
+                'created_at' => now()->subDays(3),
+            ]
+        );
+
+        // Просроченное поручение
+        $assignmentCenter2 = DirectorAssignment::query()->updateOrCreate(
+            [
+                'department_id' => $this->departments['center']->id,
+                'title' => 'Анализ эффективности грантовой программы',
+            ],
+            [
+                'description' => 'Провести анализ эффективности грантовой программы за прошлый год, подготовить рекомендации по улучшению.',
+                'status' => DirectorAssignment::STATUS_IN_PROGRESS,
+                'due_date' => now()->subDays(7),
+                'created_by' => $this->director->id,
+                'created_at' => now()->subDays(30),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentCenter2->id,
+                'comment' => 'К сожалению, не успеваем в срок. Требуется дополнительное время на сбор данных.',
+            ],
+            [
+                'user_id' => $this->users['center_head']->id,
+                'created_at' => now()->subDays(5),
+            ]
+        );
+
+        DirectorAssignmentComment::query()->updateOrCreate(
+            [
+                'director_assignment_id' => $assignmentCenter2->id,
+                'comment' => 'Хорошо, продляю срок до конца месяца. Но нужен отчет о ходе работы.',
+            ],
+            [
+                'user_id' => $this->director->id,
+                'created_at' => now()->subDays(4),
+            ]
+        );
     }
 
     private function attachParticipants(string $eventKey, array $participantKeys): void

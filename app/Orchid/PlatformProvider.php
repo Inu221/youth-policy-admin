@@ -56,6 +56,17 @@ class PlatformProvider extends OrchidServiceProvider
                 ->canSee($user && $user->isDirector())
                 ->title('Аудит'),
 
+            Menu::make('Рейтинг муниципалитетов')
+                ->icon('bs.trophy')
+                ->route('platform.department-ranking')
+                ->canSee($user && ($user->isDirector() || $user->isAnalyst())),
+
+            Menu::make('Поручения руководителя')
+                ->icon('bs.clipboard-check')
+                ->route('platform.director-assignments')
+                ->canSee($user && ($user->isDirector() || $user->isDepartmentHead()))
+                ->title('Поручения'),
+
             Menu::make('Подразделения')
                 ->icon('bs.buildings')
                 ->route('platform.departments')
