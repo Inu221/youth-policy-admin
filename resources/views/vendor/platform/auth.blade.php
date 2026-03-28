@@ -6,7 +6,7 @@
         <div class="form-signin h-full min-vh-100 d-flex flex-column justify-content-center">
 
             <a class="d-flex justify-content-center mb-4 p-0 px-sm-5" href="{{ Dashboard::prefix() }}">
-                <x-application-logo class="platform-auth-logo" />
+                <x-application-logo class="platform-auth-logo" style="display:block; height:88px; width:auto; max-width:min(100%, 320px); object-fit:contain;" />
             </a>
 
             <div class="row justify-content-center">
